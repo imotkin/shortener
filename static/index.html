@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>URL Shortener</title>
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link rel="stylesheet" href="/static/style.css">
+        <link rel="icon" type="image/x-icon" href="/static/favicon.svg">
+    </head>
+    <body>
+        <div class="card">
+            <h1>URL Shortener</h1>
+            <form id="link-form" action="/shorten" method="POST">
+                <input id="link-input" type="text" name="link" placeholder="https://example.com">
+                <button class="button" type="submit">Shorten</button>
+            </form>
+            <div class="link">
+                <a href="https://github.com/imotkin/shortener">View on GitHub</a>
+            </div>
+        </div>
+        <div id="notification" class="notification">Wrong URL format!</div>
+        <script>
+            const form = document.getElementById('link-form');
+            const linkInput = document.getElementById('link-input');
+            let counter = 0;
+
+            form.addEventListener("submit", (event) => {
+                event.preventDefault();
+
+                const linkValue = linkInput.value.trim();
+                const regex = /^((((http)|(ftp))(s)?)?:\/\/)?(\w+\.\w+(.\w+)*)$/;
+
+                if (regex.test(linkValue)) {
+                    form.submit();
+                } else {
+                    const notification = document.getElementById("notification");
+                    
+                    if (notification != null) { 
+                        notification.classList.add("show");                        
+                        counter++;
+                        setTimeout(() => {
+                            if (counter === 1) {
+                                notification.classList.remove("show");
+                            }
+                            counter--;
+                        }, 2000);
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

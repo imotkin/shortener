@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>URL Shortener</title>
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link rel="stylesheet" href="/static/style.css">
+        <link rel="icon" type="image/x-icon" href="/static/favicon.svg">
+    </head>
+    <body>
+        <div class="card">
+            <h1>URL Shortener</h1>
+            <p class="views"><span class="number">{{ .Views }}</span>views</p>
+            <p>Created: {{ .CreatedAt }} GMT</p>
+            <p>URL: <a href="{{ .MainURL }}">{{ .MainURL }}</a></p>
+            <!-- <form action="/history/{{ .ID }}">
+                <button class="blue button" type="submit">History</button>
+            </form> -->
+            <form action="/">
+                <button class="button" type="submit">Back</button>
+            </form>
+        </div>
+        <script>
+            function setPadding(element) {
+                const length = element.textContent.length;
+                const padding = 10 * (length - 1);
+                element.style.padding = `5px ${padding}px`;
+            }
+
+            const number = document.getElementsByClassName('number')[0];
+            setPadding(number);
+
+            const eventSource = new EventSource('/views/{{ .ID }}');
+
+            eventSource.addEventListener('views-update', (event) => {
+                let data;
+                
+                try {
+                    data = JSON.parse(JSON.parse(event.data));
+                } catch (error) {
+                    console.error(error);
+                    return;
+                }
+
+                if (number.textContent != data.views) {
+                    number.textContent = data.views;
+                    setPadding(number);
+                }
+            });
+        </script>
+    </body>
+</html>

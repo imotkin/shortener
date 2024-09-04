@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>URL Shortener</title>
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <link rel="stylesheet" href="/static/style.css">
+        <link rel="icon" type="image/x-icon" href="/static/favicon.svg">
+    </head>
+    <body>
+        <div id="notification" class="notification">The URL was copied!</div>
+        <div class="card">
+            <h1>URL Shortener</h1>
+            <h3>Shortened URL</h3>
+            <p>
+                <a class="url" href="{{ .MainURL }}">{{ .MainURL }}</a>
+            </p>
+            <button type="button" id="copy-button" class="green button">Copy</button>
+            <form action="{{ .StatsURL }}">
+                <button class="rose button" type="submit">Stats</button>
+            </form>
+            <form action="/">
+                <button class="blue button" type="submit">Back</button>
+            </form>
+        </div>
+        <script>
+            const button = document.getElementById("copy-button");
+            let counter = 0;
+
+            if (button != null) {
+                button.addEventListener('click', () => {
+                    const link = document.getElementsByTagName("a")[0];   
+                    navigator.clipboard.writeText(link.textContent);
+
+                    const notification = document.getElementById("notification");
+                    
+                    if (notification != null) {                    
+                        notification.classList.add("show");                    
+                        counter++;
+                        setTimeout(() => {
+                            if (counter === 1) {
+                                notification.classList.remove("show");
+                            }
+                            counter--;
+                        }, 5000);
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>
