@@ -1,44 +1,47 @@
-package main
+package database
 
 import (
 	"database/sql"
 	"fmt"
+	"github.com/imotkin/shortener/pkg/api"
+	"github.com/imotkin/shortener/pkg/migrations"
 	"log"
+	"time"
+
+	_ "modernc.org/sqlite"
 )
 
-type LinkRepository interface {
-	Add(URL, ID string) error
-	Get(ID string, counter bool) (URL, error)
+type URL struct {
+	ID         int
+	Original   string
+	Shortened  string
+	CreatedAt  time.Time
+	Views      int
+	LatestView string
+}
+
+type Stats struct {
+	IP        string
+	Country   string
+	City      string
+	VisitTime string
 }
 
 type Database struct {
 	conn *sql.DB
 }
 
-func NewDatabase(path string) *Database {
+func New(path string) *Database {
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
-		log.Fatalf("connect to database: %v", err)
+		log.Fatalf("Connect to database: %v", err)
 	}
 
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS links (
-	            		id INTEGER PRIMARY KEY AUTOINCREMENT, 
-						original TEXT NOT NULL,
-						shortened TEXT NOT NULL,
-						created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-						views INTEGER NOT NULL DEFAULT(0));
-						
-					  CREATE TABLE IF NOT EXISTS stats (
-						id INTEGER PRIMARY KEY AUTOINCREMENT,
-						link_id INTEGER NOT NULL,
-						ip TEXT,
-						visit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-						country TEXT,
-						region TEXT,
-						city TEXT,
-						FOREIGN KEY (link_id) REFERENCES links(id))`)
+	log.Printf("Load database: %s", path)
+
+	err = migrations.RunMigrations(db)
 	if err != nil {
-		log.Fatalf("create database tables: %v", err)
+		log.Fatalf("Run migrations: %v", err)
 	}
 
 	return &Database{conn: db}
@@ -72,7 +75,7 @@ func (db *Database) Get(ID string) (u URL, err error) {
 	return
 }
 
-func (db *Database) UpdateStats(link string, loc Response, IP string) error {
+func (db *Database) UpdateStats(link string, loc api.Response, IP string) error {
 	_, err := db.conn.Exec(`
 		INSERT INTO stats (link_id, ip, country, region, city) 
      	VALUES ((SELECT id FROM links WHERE original = ?), ?, ?, ?, ?)`,
@@ -88,12 +91,7 @@ func (db *Database) UpdateStats(link string, loc Response, IP string) error {
 func (db *Database) Stats(ID string) (stats []Stats, err error) {
 	rows, err := db.conn.Query(`
 		SELECT ip, country, city, strftime('%m-%d-%Y %H:%M:%S', visit_time)
-		  FROM stats WHERE link_id = (
-		  	SELECT id 
-			  FROM links 
-			 WHERE shortened = ?)
-		`, ID,
-	)
+		  FROM stats WHERE link_id = (SELECT id FROM links WHERE shortened = ?)`, ID)
 	if err != nil {
 		return nil, fmt.Errorf("get stats from database: %w", err)
 	}

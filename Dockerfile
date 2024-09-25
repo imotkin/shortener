@@ -7,8 +7,8 @@ RUN go mod download
 
 COPY . ./
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /shortener
+RUN CGO_ENABLED=0 GOOS=linux go build -o ./bin ./...
 
-EXPOSE 8000
+EXPOSE 5000
 
-CMD ["/shortener"]
+CMD ["./bin/cmd"]
