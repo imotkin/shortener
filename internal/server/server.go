@@ -2,11 +2,12 @@ package server
 
 import (
 	"fmt"
-	"github.com/imotkin/shortener/pkg/database"
-	"github.com/imotkin/shortener/pkg/middleware"
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/imotkin/shortener/internal/database"
+	"github.com/imotkin/shortener/internal/middleware"
 )
 
 var (

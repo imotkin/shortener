@@ -3,12 +3,13 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"github.com/imotkin/shortener/pkg/api"
-	"github.com/imotkin/shortener/pkg/migrations"
 	"log"
 	"time"
 
 	_ "modernc.org/sqlite"
+
+	"github.com/imotkin/shortener/internal/ip"
+	"github.com/imotkin/shortener/internal/migrations"
 )
 
 type URL struct {
@@ -75,7 +76,7 @@ func (db *Database) Get(ID string) (u URL, err error) {
 	return
 }
 
-func (db *Database) UpdateStats(link string, loc api.Response, IP string) error {
+func (db *Database) UpdateStats(link string, loc ip.Response, IP string) error {
 	_, err := db.conn.Exec(`
 		INSERT INTO stats (link_id, ip, country, region, city) 
      	VALUES ((SELECT id FROM links WHERE original = ?), ?, ?, ?, ?)`,

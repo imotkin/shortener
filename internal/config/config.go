@@ -2,8 +2,9 @@ package config
 
 import (
 	"fmt"
-	"github.com/BurntSushi/toml"
 	"log"
+
+	"github.com/BurntSushi/toml"
 )
 
 type Config struct {

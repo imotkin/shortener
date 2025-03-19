@@ -3,11 +3,12 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/imotkin/shortener/pkg/api"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/imotkin/shortener/internal/ip"
 )
 
 func (s *Server) mainHandler() http.Handler {
@@ -31,12 +32,12 @@ func (s *Server) linkHandler() http.Handler {
 		}
 
 		var (
-			loc api.Response
+			loc ip.Response
 			IP  = ParseIP(r)
 		)
 
 		if IP != "0.0.0.0" {
-			loc, err = api.FindLocation(IP)
+			loc, err = ip.FindLocation(IP)
 			if err != nil {
 				log.Printf("Find location: %v", err)
 			}
